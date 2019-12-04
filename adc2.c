@@ -40,6 +40,9 @@ static inline const x32 * x32_run(x32 *vct, size_t len, const x32 *slice) {
 			((int32_t *)vct)[slice->where] = slice->a * slice->b;
 			return slice;
 		case DIE:
+			// TODO: here
+			for (int i = 0; i < len; i++)
+				x32_write(vct + i, stdout);
 			return NULL;
 	}
 
@@ -61,7 +64,8 @@ static inline vector_x32 * x32_mmap(const char *fname) {
 
 int main() {
 
-	vector_x32 *vct = x32_mmap("/dev/stdin");
+	// vector_x32 *vct = x32_mmap("/dev/stdin");
+	vector_x32 *vct = x32_mmap("todo.txt");
 
 	x32 *const raw_vct = vector_x32_data(vct);
 	const int len = vector_x32_length(vct);
