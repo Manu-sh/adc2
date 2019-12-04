@@ -5,8 +5,10 @@
 #include <stdbool.h>
 #include <assert.h>
 
-typedef int32_t w32; // word32
+typedef uint32_t w32; // word32
 #include "my_collections/src/inlined/vector/vector_w32.h"
+
+#define W32_INVALID UINT32_MAX
 
 typedef enum {
 	ADD = 1,
@@ -24,11 +26,14 @@ typedef struct {
 
 
 static inline bool x32_read(x32 *slice, FILE *stream) {
-	return fscanf(stream, "%"SCNd32"," "%"SCNd32"," "%"SCNd32"," "%"SCNd32",", &slice->op, &slice->a, &slice->b, &slice->where) == 4;
-}
 
-static inline bool x32_write(const x32 *slice, FILE *stream) {
-	return fprintf(stream, "%"PRId32"," "%"PRId32"," "%"PRId32"," "%"PRId32",", slice->op, slice->a, slice->b, slice->where), true;
+	const int ret = fscanf(stream, "%"SCNu32"," "%"SCNu32"," "%"SCNu32"," "%"SCNu32",", &slice->op, &slice->a, &slice->b, &slice->where);
+
+	if (ret == EOF) return false;
+	for (int x = sizeof(x32) / sizeof(w32) -1; x >= ret; --x)
+		((w32 *)slice)[x] = W32_INVALID;
+
+	return true;
 }
 
 static inline const x32 * x32_run(w32 *mem32, size_t len, const x32 *slice) {
@@ -78,12 +83,17 @@ static inline void mx32_unload(vector_w32 *mem) {
 
 int main() {
 
-	vector_w32 *vct = mx32_load("todo.txt");
+	vector_w32 *vct = mx32_load("programs.txt");
 	assert(sizeof(x32) == 4 * sizeof(w32));
 	assert(vct);
 
 	const int len = vector_w32_length(vct);
 	w32 *raw_vct  = vector_w32_data(vct);
+
+	assert(len > 0);
+
+	// raw_vct[1] = 12;
+	// raw_vct[2] = 2;
 
 	// run
 	for (int i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
@@ -92,10 +102,12 @@ int main() {
 			break;
 	}
 
-	// dump
-	for (int i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
-		const x32 *slice = (const x32 *)(raw_vct + i);
-		x32_write(slice, stdout);
+	{ // dump
+		int i;
+		for (i = 1; i < len && raw_vct[i] != W32_INVALID; i++)
+			fprintf(stdout, "%"PRIu32",", raw_vct[i - 1]);
+
+		fprintf(stdout, "%"PRIu32"\n", raw_vct[i-1]);
 	}
 
 	mx32_unload(vct);
