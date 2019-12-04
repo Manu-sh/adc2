@@ -14,13 +14,14 @@ typedef enum {
 	DIE = 99
 } OP;
 
-// ensure that there is no padding
+// ensure that there is no padding here
 typedef struct {
 	w32 op;
 	w32 a;
 	w32 b;
 	w32 where;
 } __attribute__((__packed__)) x32;
+
 
 static inline bool x32_read(x32 *slice, FILE *stream) {
 	return fscanf(stream, "%"SCNd32"," "%"SCNd32"," "%"SCNd32"," "%"SCNd32",", &slice->op, &slice->a, &slice->b, &slice->where) == 4;
@@ -52,7 +53,9 @@ static inline const x32 * x32_run(w32 *mem32, size_t len, const x32 *slice) {
 	assert(0);
 }
 
-static inline vector_w32 * x32_mmap(const char *fname) {
+static inline vector_w32 * mx32_load(const char *fname) {
+
+	assert(sizeof(x32) == 4 * sizeof(w32));
 
 	FILE *fp = fopen(fname, "r");
 	vector_w32 *vct = vector_w32_new();
@@ -68,30 +71,33 @@ static inline vector_w32 * x32_mmap(const char *fname) {
 	return fclose(fp), vct;
 }
 
+static inline void mx32_unload(vector_w32 *mem) {
+	vector_w32_free(mem);
+}
+
 
 int main() {
 
-	vector_w32 *vct = x32_mmap("todo.txt");
-	w32 *raw_vct = vector_w32_data(vct);
-
+	vector_w32 *vct = mx32_load("todo.txt");
 	assert(sizeof(x32) == 4 * sizeof(w32));
 	assert(vct);
 
 	const int len = vector_w32_length(vct);
-	const x32 *slice = NULL;
+	w32 *raw_vct  = vector_w32_data(vct);
 
 	// run
 	for (int i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
-		slice = (const x32 *)(raw_vct + i);
+		const x32 *slice = (const x32 *)(raw_vct + i);
 		if (!x32_run(raw_vct, len, slice))
 			break;
 	}
 
+	// dump
 	for (int i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
-		slice = (const x32 *)(raw_vct + i);
+		const x32 *slice = (const x32 *)(raw_vct + i);
 		x32_write(slice, stdout);
 	}
 
-	vector_w32_free(vct);
+	mx32_unload(vct);
 	return 0;
 }
