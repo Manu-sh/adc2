@@ -5,8 +5,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-// word_32
-typedef int32_t w32;
+typedef int32_t w32; // word32
 #include "my_collections/src/inlined/vector/vector_w32.h"
 
 typedef enum {
@@ -57,11 +56,9 @@ static inline vector_w32 * x32_mmap(const char *fname) {
 
 	FILE *fp = fopen(fname, "r");
 	vector_w32 *vct = vector_w32_new();
-	x32 slice;
-
 	assert(fp);
 
-	while (x32_read(&slice, fp)) {
+	for (x32 slice; x32_read(&slice, fp);) {
 		vector_w32_pushBack(vct, slice.op);
 		vector_w32_pushBack(vct, slice.a);
 		vector_w32_pushBack(vct, slice.b);
@@ -72,23 +69,26 @@ static inline vector_w32 * x32_mmap(const char *fname) {
 }
 
 
-
 int main() {
 
-	assert(sizeof(x32) == 4 * sizeof(w32));
 	vector_w32 *vct = x32_mmap("todo.txt");
+	w32 *raw_vct = vector_w32_data(vct);
 
-	w32 *const raw_vct = vector_w32_data(vct);
+	assert(sizeof(x32) == 4 * sizeof(w32));
+	assert(vct);
+
 	const int len = vector_w32_length(vct);
+	const x32 *slice = NULL;
 
 	// run
 	for (int i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
-		const x32 *slice = (const x32 *)(raw_vct + i);
-		x32_run(raw_vct, len, slice);
+		slice = (const x32 *)(raw_vct + i);
+		if (!x32_run(raw_vct, len, slice))
+			break;
 	}
 
 	for (int i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
-		const x32 *slice = (const x32 *)(raw_vct + i);
+		slice = (const x32 *)(raw_vct + i);
 		x32_write(slice, stdout);
 	}
 
