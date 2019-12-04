@@ -1,5 +1,4 @@
 CFLAGS=-std=c11 -O3 -Wall -Wextra -funroll-loops -ffast-math -pipe #-pedantic
-
 .PHONY: all clean
 
 all:

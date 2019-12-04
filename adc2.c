@@ -23,7 +23,7 @@ typedef struct {
 } __attribute__((__packed__)) x32;
 
 static inline bool x32_read(x32 *slice, FILE *stream) {
-	return fscanf(stream, "%"SCNd32"," "%"SCNd32"," "%"SCNd32"," "%"SCNu32",", &slice->op, &slice->a, &slice->b, &slice->where) == 4;
+	return fscanf(stream, "%"SCNd32"," "%"SCNd32"," "%"SCNd32"," "%"SCNd32",", &slice->op, &slice->a, &slice->b, &slice->where) == 4;
 }
 
 static inline bool x32_write(const x32 *slice, FILE *stream) {
