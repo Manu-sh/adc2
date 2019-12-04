@@ -1,0 +1,3 @@
+[submodule "my_collections"]
+	path = my_collections
+	url = https://github.com/manu-sh/my_collections
