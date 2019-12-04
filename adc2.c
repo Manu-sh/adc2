@@ -92,5 +92,6 @@ int main() {
 		x32_write(slice, stdout);
 	}
 
+	vector_w32_free(vct);
 	return 0;
 }
