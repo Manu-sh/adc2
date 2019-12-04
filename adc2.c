@@ -10,11 +10,11 @@ typedef uint32_t w32; // word32
 
 #define W32_INVALID UINT32_MAX
 
-typedef enum {
+enum {
 	ADD = 1,
 	MUL,
 	DIE = 99
-} OP;
+};
 
 // ensure that there is no padding here
 typedef struct {
