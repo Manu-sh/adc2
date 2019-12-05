@@ -25,18 +25,18 @@ typedef struct {
 } __attribute__((__packed__)) x32;
 
 
-static inline bool x32_read(x32 *slice, FILE *stream) {
+static inline bool x32_read(x32 *const restrict slice, FILE *stream) {
 
 	const int ret = fscanf(stream, "%"SCNu32"," "%"SCNu32"," "%"SCNu32"," "%"SCNu32",", &slice->op, &slice->a, &slice->b, &slice->where);
 
 	if (ret == EOF) return false;
-	for (int x = sizeof(x32) / sizeof(w32) -1; x >= ret; --x)
+	for (int_fast8_t x = sizeof(x32) / sizeof(w32) -1; x >= ret; --x)
 		((w32 *)slice)[x] = W32_INVALID;
 
 	return true;
 }
 
-static inline const x32 * x32_run(w32 *mem32, size_t len, const x32 *slice) {
+static inline const x32 * x32_run(w32 *const mem32, size_t len, const x32 *const slice) {
 
 	switch (slice->op) {
 		case ADD:
@@ -96,14 +96,14 @@ int main() {
 	// raw_vct[2] = 2;
 
 	// run
-	for (int i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
+	for (int_fast32_t i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
 		const x32 *slice = (const x32 *)(raw_vct + i);
 		if (!x32_run(raw_vct, len, slice))
 			break;
 	}
 
 	{ // dump
-		int i;
+		int_fast32_t i;
 		for (i = 1; i < len && raw_vct[i] != W32_INVALID; i++)
 			fprintf(stdout, "%"PRIu32",", raw_vct[i - 1]);
 
