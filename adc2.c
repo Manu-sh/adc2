@@ -92,8 +92,8 @@ int main() {
 
 	assert(len > 0);
 
-	// raw_vct[1] = 12;
-	// raw_vct[2] = 2;
+	raw_vct[1] = 12;
+	raw_vct[2] = 2;
 
 	// run
 	for (int_fast32_t i = 0; i < len; i += sizeof(x32) / sizeof(w32)) {
